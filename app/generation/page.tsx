@@ -1252,15 +1252,15 @@ Tip: I automatically detect and install npm packages from your code imports (lik
                 <div className="flex items-center gap-2 mb-2">
                   <div className="text-purple-600 font-medium flex items-center gap-2">
                     {generationProgress.isThinking ? (
-                      <>
+                      <div key="thinking-active" className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-purple-600 rounded-full animate-pulse" />
                         AI is thinking...
-                      </>
+                      </div>
                     ) : (
-                      <>
+                      <div key="thinking-done" className="flex items-center gap-2">
                         <span className="text-purple-600">✓</span>
                         Thought for {generationProgress.thinkingDuration || 0} seconds
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>

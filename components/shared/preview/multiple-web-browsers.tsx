@@ -31,20 +31,16 @@ export default function MultipleWebBrowsers({
 
   useEffect(() => {
     if (autoRotate) {
-      startRotation();
+      interval = setInterval(() => {
+        setActiveBrowsers((prevBrowsers: BrowserData[]) => {
+          const newArray = [...prevBrowsers];
+          newArray.unshift(newArray.pop()!); // move the last element to the front
+          return newArray;
+        });
+      }, rotationInterval);
     }
     return () => clearInterval(interval);
   }, [autoRotate, rotationInterval]);
-
-  const startRotation = () => {
-    interval = setInterval(() => {
-      setActiveBrowsers((prevBrowsers: BrowserData[]) => {
-        const newArray = [...prevBrowsers];
-        newArray.unshift(newArray.pop()!); // move the last element to the front
-        return newArray;
-      });
-    }, rotationInterval);
-  };
 
   return (
     <div className="relative h-[600px] w-full">

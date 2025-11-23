@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { appConfig } from '@/config/app.config';
@@ -702,11 +703,13 @@ export default function HomePage() {
                       </div>
                       
                       {result.screenshot ? (
-                        <img 
-                          src={result.screenshot} 
+                        <Image
+                          src={result.screenshot}
                           alt={result.title}
                           className="w-full h-full object-cover object-top"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 400px"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-50 flex items-center justify-center">

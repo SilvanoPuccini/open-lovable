@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 export default function LivePreviewFrame({
   sessionId,
@@ -31,7 +31,7 @@ export default function LivePreviewFrame({
   const [isIdle, setIsIdle] = useState(false);
 
   // Function to start the random idle movement sequence
-  const scheduleNextIdleMove = () => {
+  const scheduleNextIdleMove = useCallback(() => {
     if (idleMoveTimerRef.current) {
       clearTimeout(idleMoveTimerRef.current);
     }
@@ -49,7 +49,7 @@ export default function LivePreviewFrame({
         scheduleNextIdleMove(); // Schedule the next one
       }
     }, randomDelay);
-  };
+  }, [isIdle]);
 
   // Effect to handle starting/stopping idle movement sequence
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function LivePreviewFrame({
         clearTimeout(idleMoveTimerRef.current);
       }
     };
-  }, [isIdle]);
+  }, [isIdle, scheduleNextIdleMove]);
 
   // Main Animation effect (runs continuously)
   useEffect(() => {
@@ -122,7 +122,8 @@ export default function LivePreviewFrame({
         clearTimeout(idleStartTimerRef.current);
       }
     };
-  }, [targetPosition]); // Re-run main loop logic if targetPosition changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [targetPosition]); // Re-run main loop logic if targetPosition changes. isIdle intentionally not in deps to avoid restarting animation loop
 
   const cleanupConnection = () => {
     if (reconnectTimeoutRef.current) {
@@ -150,7 +151,7 @@ export default function LivePreviewFrame({
     }
   }, [onScrapeComplete]);
 
-  const connect = () => {
+  const connect = useCallback(() => {
     setIsConnecting(true);
     // Clear any existing connection
     if (wsRef.current) {
@@ -270,7 +271,7 @@ export default function LivePreviewFrame({
       console.error("Failed to create connection");
       setIsConnecting(false);
     }
-  };
+  }, [sessionId, isIdle]);
 
   useEffect(() => {
     // Only connect if we have a sessionId
@@ -289,7 +290,7 @@ export default function LivePreviewFrame({
         cleanupConnection();
       };
     }
-  }, [sessionId]); // Re-run effect when sessionId changes
+  }, [sessionId, connect]); // Re-run effect when sessionId changes
 
   return (
     <div
@@ -326,6 +327,7 @@ export default function LivePreviewFrame({
       <img
         ref={imgRef}
         id="live-frame"
+        alt="Live preview frame"
         onLoad={() => {
           setImageLoaded(true);
           if (onScrapeComplete) onScrapeComplete();

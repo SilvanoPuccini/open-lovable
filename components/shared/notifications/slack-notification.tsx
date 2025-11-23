@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function SlackNotification({
   shouldNotify,
@@ -32,10 +33,13 @@ export default function SlackNotification({
       >
         <div className="flex flex-row items-center max-w-xs cursor-pointer">
           <div className="flex min-w-16 mr-2 mt-1">
-            <img
+            <Image
               className="w-16 h-16"
               src="/images/slack_logo_icon.png"
               alt="Slack Logo"
+              width={64}
+              height={64}
+              priority
             />
           </div>
           <div className="flex flex-col">

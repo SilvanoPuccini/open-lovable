@@ -3,34 +3,34 @@
 import React, { useEffect, useRef } from "react";
 import { setIntervalOnVisible } from "@/utils/set-timeout-on-visible";
 
+// Simple ASCII pattern for subtle animation (moved outside component to avoid recreating)
+const asciiFrames = [
+  "░░░░░░░░░░░░░░░░",
+  "▒░░░░░░░░░░░░░░░",
+  "▒▒░░░░░░░░░░░░░░",
+  "░▒▒░░░░░░░░░░░░░",
+  "░░▒▒░░░░░░░░░░░░",
+  "░░░▒▒░░░░░░░░░░░",
+  "░░░░▒▒░░░░░░░░░░",
+  "░░░░░▒▒░░░░░░░░░",
+  "░░░░░░▒▒░░░░░░░░",
+  "░░░░░░░▒▒░░░░░░░",
+  "░░░░░░░░▒▒░░░░░░",
+  "░░░░░░░░░▒▒░░░░░",
+  "░░░░░░░░░░▒▒░░░░",
+  "░░░░░░░░░░░▒▒░░░",
+  "░░░░░░░░░░░░▒▒░░",
+  "░░░░░░░░░░░░░▒▒░",
+  "░░░░░░░░░░░░░░▒▒",
+  "░░░░░░░░░░░░░░░▒",
+];
+
 export default function SubtleAsciiAnimation({
   className = "",
 }: {
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Simple ASCII pattern for subtle animation
-  const asciiFrames = [
-    "░░░░░░░░░░░░░░░░",
-    "▒░░░░░░░░░░░░░░░",
-    "▒▒░░░░░░░░░░░░░░",
-    "░▒▒░░░░░░░░░░░░░",
-    "░░▒▒░░░░░░░░░░░░",
-    "░░░▒▒░░░░░░░░░░░",
-    "░░░░▒▒░░░░░░░░░░",
-    "░░░░░▒▒░░░░░░░░░",
-    "░░░░░░▒▒░░░░░░░░",
-    "░░░░░░░▒▒░░░░░░░",
-    "░░░░░░░░▒▒░░░░░░",
-    "░░░░░░░░░▒▒░░░░░",
-    "░░░░░░░░░░▒▒░░░░",
-    "░░░░░░░░░░░▒▒░░░",
-    "░░░░░░░░░░░░▒▒░░",
-    "░░░░░░░░░░░░░▒▒░",
-    "░░░░░░░░░░░░░░▒▒",
-    "░░░░░░░░░░░░░░░▒",
-  ];
 
   useEffect(() => {
     let frameIndex = 0;

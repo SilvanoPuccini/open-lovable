@@ -1,35 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { SandboxProvider } from '@/lib/sandbox/types';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { sanitizePackageList, checkRateLimit, getClientId } from '@/lib/security';
 
 declare global {
+  // eslint-disable-next-line no-var
   var activeSandboxProvider: any;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientId = getClientId(request);
+    const rateCheck = checkRateLimit(`install-packages:${clientId}`, 5, 60_000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Rate limit exceeded. Try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { packages } = await request.json();
-    
+
     if (!packages || !Array.isArray(packages) || packages.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Packages array is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Packages array is required'
       }, { status: 400 });
     }
-    
-    // Get provider from sandbox manager or global state
+
+    // Validate and sanitize package names
+    const { valid: validPackages, invalid: invalidPackages } = sanitizePackageList(packages);
+
+    if (invalidPackages.length > 0) {
+      console.warn(`[install-packages-v2] Rejected invalid package names:`, invalidPackages);
+    }
+
+    if (validPackages.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'No valid package names provided'
+      }, { status: 400 });
+    }
+
     const provider = sandboxManager.getActiveProvider() || global.activeSandboxProvider;
-    
+
     if (!provider) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'No active sandbox' 
+      return NextResponse.json({
+        success: false,
+        error: 'No active sandbox'
       }, { status: 400 });
     }
-    
-    console.log(`[install-packages-v2] Installing: ${packages.join(', ')}`);
-    
-    const result = await provider.installPackages(packages);
+
+    console.log(`[install-packages-v2] Installing: ${validPackages.join(', ')}`);
+
+    const result = await provider.installPackages(validPackages);
     
     return NextResponse.json({
       success: result.success,

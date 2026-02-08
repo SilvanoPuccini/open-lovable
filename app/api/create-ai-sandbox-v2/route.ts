@@ -93,9 +93,8 @@ export async function POST() {
     }
     
     return NextResponse.json(
-      { 
-        error: error instanceof Error ? error.message : 'Failed to create sandbox',
-        details: error instanceof Error ? error.stack : undefined
+      {
+        error: error instanceof Error ? error.message : 'Failed to create sandbox'
       },
       { status: 500 }
     );

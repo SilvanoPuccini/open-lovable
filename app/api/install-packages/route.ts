@@ -1,40 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sanitizePackageList, checkRateLimit, getClientId } from '@/lib/security';
 
 declare global {
+  // eslint-disable-next-line no-var
   var activeSandbox: any;
+  // eslint-disable-next-line no-var
   var activeSandboxProvider: any;
+  // eslint-disable-next-line no-var
   var sandboxData: any;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const clientId = getClientId(request);
+    const rateCheck = checkRateLimit(`install-packages:${clientId}`, 5, 60_000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: 'Rate limit exceeded. Try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { packages } = await request.json();
-    // sandboxId not used - using global sandbox
-    
+
     if (!packages || !Array.isArray(packages) || packages.length === 0) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'Packages array is required' 
+      return NextResponse.json({
+        success: false,
+        error: 'Packages array is required'
       }, { status: 400 });
     }
-    
-    // Validate and deduplicate package names
-    const validPackages = [...new Set(packages)]
-      .filter(pkg => pkg && typeof pkg === 'string' && pkg.trim() !== '')
-      .map(pkg => pkg.trim());
-    
+
+    // Validate and sanitize package names
+    const { valid: validPackages, invalid: invalidPackages } = sanitizePackageList(packages);
+
+    if (invalidPackages.length > 0) {
+      console.warn(`[install-packages] Rejected invalid package names:`, invalidPackages);
+    }
+
     if (validPackages.length === 0) {
       return NextResponse.json({
         success: false,
         error: 'No valid package names provided'
       }, { status: 400 });
-    }
-    
-    // Log if duplicates were found
-    if (packages.length !== validPackages.length) {
-      console.log(`[install-packages] Cleaned packages: removed ${packages.length - validPackages.length} invalid/duplicate entries`);
-      console.log(`[install-packages] Original:`, packages);
-      console.log(`[install-packages] Cleaned:`, validPackages);
     }
     
     // Get active sandbox provider

@@ -235,12 +235,11 @@ print(json.dumps(files))
     };
   }
 
-  async setupViteApp(): Promise<void> {
+  override async setupViteApp(): Promise<void> {
     if (!this.sandbox) {
       throw new Error('No active sandbox');
     }
 
-    
     // Write all files in a single Python script
     const setupScript = `
 import os
@@ -458,12 +457,11 @@ print('Waiting for server to be ready...')
     this.existingFiles.add('postcss.config.js');
   }
 
-  async restartViteServer(): Promise<void> {
+  override async restartViteServer(): Promise<void> {
     if (!this.sandbox) {
       throw new Error('No active sandbox');
     }
 
-    
     await this.sandbox.runCode(`
 import subprocess
 import time

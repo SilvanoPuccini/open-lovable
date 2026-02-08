@@ -115,21 +115,24 @@ export class E2BProvider extends SandboxProvider {
     // Use the E2B filesystem API to write the file
     // Note: E2B SDK uses files.write() method
     if ((this.sandbox as any).files && typeof (this.sandbox as any).files.write === 'function') {
-      // Use the files.write API if available
       await (this.sandbox as any).files.write(fullPath, Buffer.from(content));
     } else {
-      // Fallback to Python code execution
+      // Fallback to Python code execution with safe serialization
+      const safePath = JSON.stringify(fullPath);
+      const safeContent = JSON.stringify(content);
       await this.sandbox.runCode(`
-        import os
+import os
+import json
 
-        # Ensure directory exists
-        dir_path = os.path.dirname("${fullPath}")
-        os.makedirs(dir_path, exist_ok=True)
+file_path = json.loads(${JSON.stringify(safePath)})
+file_content = json.loads(${JSON.stringify(safeContent)})
 
-        # Write file
-        with open("${fullPath}", 'w') as f:
-            f.write(${JSON.stringify(content)})
-        print(f"✓ Written: ${fullPath}")
+dir_path = os.path.dirname(file_path)
+os.makedirs(dir_path, exist_ok=True)
+
+with open(file_path, 'w') as f:
+    f.write(file_content)
+print(f"Written: {file_path}")
       `);
     }
     
@@ -143,10 +146,13 @@ export class E2BProvider extends SandboxProvider {
 
     const fullPath = path.startsWith('/') ? path : `/home/user/app/${path}`;
     
+    const safePath = JSON.stringify(fullPath);
     const result = await this.sandbox.runCode(`
-      with open("${fullPath}", 'r') as f:
-          content = f.read()
-      print(content)
+import json
+file_path = json.loads(${JSON.stringify(safePath)})
+with open(file_path, 'r') as f:
+    content = f.read()
+print(content)
     `);
     
     return result.logs.stdout.join('\n');
@@ -157,22 +163,23 @@ export class E2BProvider extends SandboxProvider {
       throw new Error('No active sandbox');
     }
 
+    const safeDir = JSON.stringify(directory);
     const result = await this.sandbox.runCode(`
-      import os
-      import json
+import os
+import json
 
-      def list_files(path):
-          files = []
-          for root, dirs, filenames in os.walk(path):
-              # Skip node_modules and .git
-              dirs[:] = [d for d in dirs if d not in ['node_modules', '.git', '.next', 'dist', 'build']]
-              for filename in filenames:
-                  rel_path = os.path.relpath(os.path.join(root, filename), path)
-                  files.append(rel_path)
-          return files
+def list_files(path):
+    files = []
+    for root, dirs, filenames in os.walk(path):
+        dirs[:] = [d for d in dirs if d not in ['node_modules', '.git', '.next', 'dist', 'build']]
+        for filename in filenames:
+            rel_path = os.path.relpath(os.path.join(root, filename), path)
+            files.append(rel_path)
+    return files
 
-      files = list_files("${directory}")
-      print(json.dumps(files))
+dir_path = json.loads(${JSON.stringify(safeDir)})
+files = list_files(dir_path)
+print(json.dumps(files))
     `);
     
     try {

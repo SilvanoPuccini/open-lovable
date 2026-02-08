@@ -123,14 +123,14 @@ export const appConfig = {
   
   // Development Configuration
   dev: {
-    // Enable debug logging
-    enableDebugLogging: true,
-    
+    // Enable debug logging (only in development)
+    enableDebugLogging: process.env.NODE_ENV === 'development',
+
     // Enable performance monitoring
     enablePerformanceMonitoring: false,
-    
-    // Log API responses
-    logApiResponses: true,
+
+    // Log API responses (NEVER enable in production - may leak sensitive data)
+    logApiResponses: process.env.NODE_ENV === 'development',
   },
   
   // Package Installation Configuration
@@ -167,7 +167,7 @@ export const appConfig = {
       '.css', '.scss', '.sass',
       '.html', '.xml', '.svg',
       '.json', '.yml', '.yaml',
-      '.md', '.txt', '.env',
+      '.md', '.txt',
       '.gitignore', '.dockerignore'
     ],
   },

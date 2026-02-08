@@ -165,17 +165,11 @@ export class VercelProvider extends SandboxProvider {
         // Directory created
       }
       
-      // Write file using echo and redirection
-      const escapedContent = content
-        .replace(/\\/g, '\\\\')
-        .replace(/"/g, '\\"')
-        .replace(/\$/g, '\\$')
-        .replace(/`/g, '\\`')
-        .replace(/\n/g, '\\n');
-      
+      // Write file using a heredoc approach with a unique delimiter to avoid injection
+      const delimiter = `EOF_${Date.now()}_${Math.random().toString(36).slice(2)}`;
       const writeResult = await this.sandbox.runCommand({
         cmd: 'sh',
-        args: ['-c', `echo "${escapedContent}" > "${fullPath}"`]
+        args: ['-c', `cat > "${fullPath}" <<'${delimiter}'\n${content}\n${delimiter}`]
       });
       
       // File written
@@ -237,9 +231,11 @@ export class VercelProvider extends SandboxProvider {
       throw new Error('No active sandbox');
     }
 
+    // Quote the directory path to prevent shell injection
+    const safeDir = directory.replace(/[^a-zA-Z0-9/_.-]/g, '');
     const result = await this.sandbox.runCommand({
       cmd: 'sh',
-      args: ['-c', `find ${directory} -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.next/*" -not -path "*/dist/*" -not -path "*/build/*" | sed "s|^${directory}/||"`],
+      args: ['-c', `find "${safeDir}" -type f -not -path "*/node_modules/*" -not -path "*/.git/*" -not -path "*/.next/*" -not -path "*/dist/*" -not -path "*/build/*" | sed "s|^${safeDir}/||"`],
       cwd: '/'
     });
     

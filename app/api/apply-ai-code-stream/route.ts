@@ -41,7 +41,7 @@ function parseAIResponse(response: string): ParsedResponse {
     while ((importMatch = importRegex.exec(content)) !== null) {
       const importPath = importMatch[1];
       // Skip relative imports and built-in React
-      if (!importPath.startsWith('.') && !importPath.startsWith('/') &&
+      if (importPath && !importPath.startsWith('.') && !importPath.startsWith('/') &&
         importPath !== 'react' && importPath !== 'react-dom' &&
         !importPath.startsWith('@/')) {
         // Extract package name (handle scoped packages like @heroicons/react)
@@ -49,7 +49,7 @@ function parseAIResponse(response: string): ParsedResponse {
           ? importPath.split('/').slice(0, 2).join('/')
           : importPath.split('/')[0];
 
-        if (!packages.includes(packageName)) {
+        if (packageName && !packages.includes(packageName)) {
           packages.push(packageName);
 
           // Log important packages for debugging

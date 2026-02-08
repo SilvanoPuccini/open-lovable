@@ -141,7 +141,7 @@ export function validateCommand(command: string): {
   }
 
   const parts = trimmed.split(/\s+/);
-  const cmd = parts[0];
+  const cmd = parts[0] ?? '';
   const args = parts.slice(1);
 
   if (!ALLOWED_COMMANDS.has(cmd)) {

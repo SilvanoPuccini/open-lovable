@@ -318,7 +318,7 @@ export class VercelProvider extends SandboxProvider {
     };
   }
 
-  async setupViteApp(): Promise<void> {
+  override async setupViteApp(): Promise<void> {
     if (!this.sandbox) {
       throw new Error('No active sandbox');
     }
@@ -540,7 +540,7 @@ body {
     this.existingFiles.add('postcss.config.js');
   }
 
-  async restartViteServer(): Promise<void> {
+  override async restartViteServer(): Promise<void> {
     if (!this.sandbox) {
       throw new Error('No active sandbox');
     }

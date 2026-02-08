@@ -1,0 +1,52 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "installCommand": "npm install",
+  "functions": {
+    "app/api/generate-ai-code-stream/route.ts": {
+      "maxDuration": 120
+    },
+    "app/api/apply-ai-code-stream/route.ts": {
+      "maxDuration": 120
+    },
+    "app/api/apply-ai-code/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/create-ai-sandbox/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/create-ai-sandbox-v2/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/scrape-url-enhanced/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/scrape-website/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/scrape-screenshot/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/install-packages/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/install-packages-v2/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/detect-and-install-packages/route.ts": {
+      "maxDuration": 60
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    }
+  ],
+  "crons": []
+}

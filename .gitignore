@@ -55,5 +55,9 @@ e2b-template-*
 *.tmp
 *.temp
 repomix-output.txt
+
+# Alternate lockfiles (project uses npm/package-lock.json)
+bun.lock
 bun.lockb
+pnpm-lock.yaml
 .env*.local

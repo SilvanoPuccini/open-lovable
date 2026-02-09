@@ -399,23 +399,35 @@ print('\\nAll files created successfully!')
     await this.sandbox.runCode(setupScript);
     
     // Install dependencies
-    await this.sandbox.runCode(`
+    console.log('[E2BProvider] Installing npm packages...');
+    const installResult = await this.sandbox.runCode(`
 import subprocess
+import sys
 
 print('Installing npm packages...')
 result = subprocess.run(
     ['npm', 'install'],
     cwd='/home/user/app',
     capture_output=True,
-    text=True
+    text=True,
+    timeout=120
 )
 
 if result.returncode == 0:
-    print('✓ Dependencies installed successfully')
+    print('Dependencies installed successfully')
+    print(result.stdout[-500:] if len(result.stdout) > 500 else result.stdout)
 else:
-    print(f'⚠ Warning: npm install had issues: {result.stderr}')
+    print(f'ERROR: npm install failed with exit code {result.returncode}')
+    print(f'STDERR: {result.stderr[-1000:]}')
+    sys.exit(1)
     `);
-    
+
+    if (installResult.error) {
+      console.error('[E2BProvider] npm install failed:', installResult.error);
+      throw new Error('Failed to install npm dependencies in sandbox');
+    }
+    console.log('[E2BProvider] npm install completed');
+
     // Start Vite dev server
     await this.sandbox.runCode(`
 import subprocess
@@ -428,23 +440,23 @@ os.chdir('/home/user/app')
 subprocess.run(['pkill', '-f', 'vite'], capture_output=True)
 time.sleep(1)
 
-# Start Vite dev server
+# Start Vite dev server in background
 env = os.environ.copy()
 env['FORCE_COLOR'] = '0'
 
 process = subprocess.Popen(
     ['npm', 'run', 'dev'],
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
+    stdout=open('/tmp/vite-stdout.log', 'w'),
+    stderr=open('/tmp/vite-stderr.log', 'w'),
     env=env
 )
 
-print(f'✓ Vite dev server started with PID: {process.pid}')
-print('Waiting for server to be ready...')
+print(f'Vite dev server started with PID: {process.pid}')
     `);
-    
-    // Wait for Vite to be ready
-    await new Promise(resolve => setTimeout(resolve, appConfig.e2b.viteStartupDelay));
+
+    // Wait for Vite to be ready with actual health check
+    console.log('[E2BProvider] Waiting for Vite server to be ready...');
+    await this.waitForViteReady();
     
     // Track initial files
     this.existingFiles.add('src/App.jsx');
@@ -457,10 +469,82 @@ print('Waiting for server to be ready...')
     this.existingFiles.add('postcss.config.js');
   }
 
+  /**
+   * Wait for Vite dev server to become ready by polling with retries.
+   * Checks if the server is actually listening on the expected port.
+   */
+  private async waitForViteReady(maxRetries: number = 20, intervalMs: number = 2000): Promise<void> {
+    if (!this.sandbox) {
+      throw new Error('No active sandbox');
+    }
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await this.sandbox.runCode(`
+import urllib.request
+import json
+
+try:
+    req = urllib.request.urlopen('http://localhost:${appConfig.e2b.vitePort}/', timeout=3)
+    status = req.getcode()
+    print(json.dumps({"ready": True, "status": status}))
+except Exception as e:
+    print(json.dumps({"ready": False, "error": str(e)}))
+        `);
+
+        const output = (result.results?.[0] as any)?.text?.trim() ||
+                        result.logs?.stdout?.join('')?.trim() || '';
+
+        try {
+          const parsed = JSON.parse(output);
+          if (parsed.ready) {
+            console.log(`[E2BProvider] Vite server ready after ${attempt * intervalMs / 1000}s`);
+            return;
+          }
+        } catch {
+          // JSON parse failed, server not ready yet
+        }
+
+        if (attempt < maxRetries) {
+          console.log(`[E2BProvider] Vite not ready (attempt ${attempt}/${maxRetries}), retrying...`);
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      } catch {
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      }
+    }
+
+    // After all retries, check if Vite process is even running
+    const processCheck = await this.sandbox.runCode(`
+import subprocess
+result = subprocess.run(['pgrep', '-f', 'vite'], capture_output=True, text=True)
+if result.stdout.strip():
+    print(f'Vite process running: PIDs {result.stdout.strip()}')
+else:
+    print('ERROR: No Vite process found')
+
+# Check logs for errors
+import os
+if os.path.exists('/tmp/vite-stderr.log'):
+    with open('/tmp/vite-stderr.log', 'r') as f:
+        stderr = f.read()
+    if stderr.strip():
+        print(f'Vite stderr: {stderr[-500:]}')
+    `);
+
+    const checkOutput = processCheck.logs?.stdout?.join('') || '';
+    console.error(`[E2BProvider] Vite failed to become ready after ${maxRetries * intervalMs / 1000}s. Process check: ${checkOutput}`);
+    throw new Error(`Vite server failed to start after ${maxRetries * intervalMs / 1000}s. Check sandbox logs for details.`);
+  }
+
   override async restartViteServer(): Promise<void> {
     if (!this.sandbox) {
       throw new Error('No active sandbox');
     }
+
+    console.log('[E2BProvider] Restarting Vite server...');
 
     await this.sandbox.runCode(`
 import subprocess
@@ -479,16 +563,16 @@ env['FORCE_COLOR'] = '0'
 
 process = subprocess.Popen(
     ['npm', 'run', 'dev'],
-    stdout=subprocess.PIPE,
-    stderr=subprocess.PIPE,
+    stdout=open('/tmp/vite-stdout.log', 'w'),
+    stderr=open('/tmp/vite-stderr.log', 'w'),
     env=env
 )
 
-print(f'✓ Vite restarted with PID: {process.pid}')
+print(f'Vite restarted with PID: {process.pid}')
     `);
-    
-    // Wait for Vite to be ready
-    await new Promise(resolve => setTimeout(resolve, appConfig.e2b.viteStartupDelay));
+
+    // Wait for Vite to actually be ready
+    await this.waitForViteReady();
   }
 
   getSandboxUrl(): string | null {

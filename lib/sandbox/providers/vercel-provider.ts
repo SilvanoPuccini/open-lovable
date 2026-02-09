@@ -545,29 +545,67 @@ body {
       throw new Error('No active sandbox');
     }
 
-    // Restarting Vite server
-    
+    console.log('[VercelProvider] Restarting Vite server...');
+
     // Kill existing Vite process
     await this.sandbox.runCommand({
       cmd: 'sh',
       args: ['-c', 'pkill -f vite || true'],
       cwd: '/'
     });
-    
-    // Wait a moment
+
+    // Wait for process to terminate
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     // Start Vite in background
     await this.sandbox.runCommand({
       cmd: 'sh',
       args: ['-c', 'nohup npm run dev > /tmp/vite.log 2>&1 &'],
       cwd: '/vercel/sandbox'
     });
-    
-    // Vite server started in background
-    
-    // Wait for Vite to be ready
-    await new Promise(resolve => setTimeout(resolve, 7000));
+
+    // Wait for Vite to actually be ready with health check
+    await this.waitForDevServerReady();
+  }
+
+  /**
+   * Wait for dev server to become ready by polling with retries.
+   */
+  private async waitForDevServerReady(maxRetries: number = 15, intervalMs: number = 2000): Promise<void> {
+    if (!this.sandbox) {
+      throw new Error('No active sandbox');
+    }
+
+    const port = this.config.vercel ? 3000 : 5173;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const result = await this.sandbox.runCommand({
+          cmd: 'sh',
+          args: ['-c', `curl -s -o /dev/null -w "%{http_code}" http://localhost:${port}/ 2>/dev/null || echo "000"`],
+          cwd: '/'
+        });
+
+        const stdout = typeof result.stdout === 'function' ? await result.stdout() : result.stdout;
+        const statusCode = (stdout || '').toString().trim();
+
+        if (statusCode === '200' || statusCode === '304') {
+          console.log(`[VercelProvider] Dev server ready after ${attempt * intervalMs / 1000}s`);
+          return;
+        }
+
+        if (attempt < maxRetries) {
+          console.log(`[VercelProvider] Dev server not ready (status: ${statusCode}, attempt ${attempt}/${maxRetries})`);
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      } catch {
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, intervalMs));
+        }
+      }
+    }
+
+    console.warn(`[VercelProvider] Dev server may not be fully ready after ${maxRetries * intervalMs / 1000}s, proceeding anyway`);
   }
 
   getSandboxUrl(): string | null {

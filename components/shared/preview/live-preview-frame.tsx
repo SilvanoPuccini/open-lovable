@@ -19,7 +19,8 @@ export default function LivePreviewFrame({
   const idleStartTimerRef = useRef<NodeJS.Timeout | null>(null);
   const idleMoveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [_isConnecting, setIsConnecting] = useState(true);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [isConnecting, setIsConnecting] = useState(true);
   const [cursorPosition, setCursorPosition] = useState<{
     x: number;
     y: number;
@@ -122,8 +123,7 @@ export default function LivePreviewFrame({
         clearTimeout(idleStartTimerRef.current);
       }
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetPosition]); // Re-run main loop logic if targetPosition changes. isIdle intentionally not in deps to avoid restarting animation loop
+  }, [targetPosition, isIdle]); // Re-run main loop logic if targetPosition changes
 
   const cleanupConnection = () => {
     if (reconnectTimeoutRef.current) {
@@ -183,10 +183,8 @@ export default function LivePreviewFrame({
             typeof event.data === "string" &&
             event.data.startsWith("data:image")
           ) {
-            if (imgRef.current) {
-              imgRef.current.src = event.data;
-              return;
-            }
+            setImageSrc(event.data);
+            return;
           }
 
           // If not direct image data, try parsing as JSON
@@ -233,19 +231,15 @@ export default function LivePreviewFrame({
             }
           }
 
-          if (imgRef.current && data.frame) {
+          if (data.frame) {
             const img = "data:image/jpeg;base64," + data.frame;
             localStorage.setItem("browserImageData", img);
-            imgRef.current.src = img;
+            setImageSrc(img);
           }
         } catch (_e) {
           // Try to use raw data as fallback if JSON parsing fails
-          if (typeof event.data === "string" && imgRef.current) {
-            try {
-              imgRef.current.src = event.data;
-            } catch (imgError) {
-              console.error("Failed to set image source directly:", imgError);
-            }
+          if (typeof event.data === "string") {
+            setImageSrc(event.data);
           }
         }
       });
@@ -323,22 +317,25 @@ export default function LivePreviewFrame({
         </div>
       ) : null}
 
-      {/* Preview image */}
-      <img
-        ref={imgRef}
-        id="live-frame"
-        alt="Live preview frame"
-        onLoad={() => {
-          setImageLoaded(true);
-          if (onScrapeComplete) onScrapeComplete();
-        }}
-        className={`w-auto h-auto max-w-full max-h-full object-contain transform-gpu ${
-          !imageLoaded ? "opacity-0 scale-95" : "opacity-100 scale-100"
-        } transition-all duration-300 ease-out`}
-        style={{
-          backgroundColor: "#f0f0f0",
-        }}
-      />
+      {/* Preview image - Using regular img tag for dynamic WebSocket stream */}
+      {imageSrc && (
+        <img
+          ref={imgRef}
+          id="live-frame"
+          src={imageSrc}
+          alt="Live preview"
+          onLoad={() => {
+            setImageLoaded(true);
+            if (onScrapeComplete) onScrapeComplete();
+          }}
+          className={`w-auto h-auto max-w-full max-h-full object-contain transform-gpu ${
+            !imageLoaded ? "opacity-0 scale-95" : "opacity-100 scale-100"
+          } transition-all duration-300 ease-out`}
+          style={{
+            backgroundColor: "#f0f0f0",
+          }}
+        />
+      )}
     </div>
   );
 }

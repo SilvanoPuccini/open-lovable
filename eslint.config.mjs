@@ -24,6 +24,12 @@ const eslintConfig = [
       "react/no-unescaped-entities": "warn",
       "prefer-const": "error"
     }
+  },
+  {
+    files: ["**/live-preview-frame.tsx"],
+    rules: {
+      "@next/next/no-img-element": "off" // Dynamic WebSocket stream images require regular img tag
+    }
   }
 ];
 

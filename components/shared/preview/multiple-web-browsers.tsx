@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import WebBrowser from "./web-browser";
 
@@ -29,18 +29,22 @@ export default function MultipleWebBrowsers({
   const SCALE_FACTOR = scaleFactor || 0.06;
   const [activeBrowsers, setActiveBrowsers] = useState<BrowserData[]>(browsers);
 
+  const startRotation = useCallback(() => {
+    interval = setInterval(() => {
+      setActiveBrowsers((prevBrowsers: BrowserData[]) => {
+        const newArray = [...prevBrowsers];
+        newArray.unshift(newArray.pop()!); // move the last element to the front
+        return newArray;
+      });
+    }, rotationInterval);
+  }, [rotationInterval]);
+
   useEffect(() => {
     if (autoRotate) {
-      interval = setInterval(() => {
-        setActiveBrowsers((prevBrowsers: BrowserData[]) => {
-          const newArray = [...prevBrowsers];
-          newArray.unshift(newArray.pop()!); // move the last element to the front
-          return newArray;
-        });
-      }, rotationInterval);
+      startRotation();
     }
     return () => clearInterval(interval);
-  }, [autoRotate, rotationInterval]);
+  }, [autoRotate, startRotation]);
 
   return (
     <div className="relative h-[600px] w-full">

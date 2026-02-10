@@ -18,13 +18,13 @@ export function FlameBackground({
   children,
 }: FlameBackgroundProps) {
   // Convert 0-100 to 0-0.3 opacity
-  const opacity = Math.min((intensity / 100) * 0.3, 0.3);
+  const _opacity = Math.min((intensity / 100) * 0.3, 0.3);
 
   // Speed increases with intensity
-  const speed = Math.max(80 - (intensity / 100) * 40, 40);
+  const _speed = Math.max(80 - (intensity / 100) * 40, 40);
 
   // Color gets more orange with intensity
-  const color =
+  const _color =
     intensity > 80 ? "heat-100" : intensity > 50 ? "heat-40" : "black-alpha-20";
 
   return (

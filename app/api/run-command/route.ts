@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { validateCommand, checkRateLimit, getClientId } from '@/lib/security';
 
 declare global {
-  // eslint-disable-next-line no-var
   var activeSandbox: any;
 }
 

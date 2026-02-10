@@ -194,7 +194,7 @@ print(json.dumps(files))
       throw new Error('No active sandbox');
     }
 
-    const packageList = packages.join(' ');
+    const _packageList = packages.join(' ');
     const flags = appConfig.packages.useLegacyPeerDeps ? '--legacy-peer-deps' : '';
     
     

@@ -116,7 +116,7 @@ with open(zip_path, 'rb') as f:
 
         // Install zip utility using dnf package manager with sudo
         console.log('[create-zip] Installing zip utility...');
-        const installResult = await provider.sandbox.runCommand({
+        const _installResult = await provider.sandbox.runCommand({
           cmd: 'dnf',
           args: ['install', '-y', 'zip'],
           sudo: true
@@ -137,7 +137,7 @@ with open(zip_path, 'rb') as f:
           } else {
             stderr = zipResult.stderr || '';
           }
-        } catch (e) {
+        } catch (_e) {
           stderr = '';
         }
 
@@ -157,7 +157,7 @@ with open(zip_path, 'rb') as f:
           } else {
             fileSize = (sizeResult.stdout || '').trim();
           }
-        } catch (e) {
+        } catch (_e) {
           fileSize = 'unknown';
         }
         console.log(`[create-zip] Created project.zip (${fileSize} bytes)`);
@@ -175,7 +175,7 @@ with open(zip_path, 'rb') as f:
           } else {
             readStderr = readResult.stderr || '';
           }
-        } catch (e) {
+        } catch (_e) {
           readStderr = '';
         }
 
@@ -190,7 +190,7 @@ with open(zip_path, 'rb') as f:
           } else {
             base64Content = (readResult.stdout || '').trim();
           }
-        } catch (e) {
+        } catch (_e) {
           throw new Error('Failed to get base64 content from command result');
         }
 

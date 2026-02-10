@@ -54,7 +54,7 @@ export default function ControlPanel({
   analysisData,
   onReset,
 }: ControlPanelProps) {
-  const [showAIAnalysis, setShowAIAnalysis] = useState(false); // Reserved for AI analysis feature
+  const [_showAIAnalysis, setShowAIAnalysis] = useState(false); // Reserved for AI analysis feature
   const [aiInsights, setAiInsights] = useState<CheckItem[]>([]);
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
   const [combinedChecks, setCombinedChecks] = useState<CheckItem[]>([]);
@@ -343,7 +343,7 @@ export default function ControlPanel({
   };
 
   // Utility function available but not used in current render
-  const getScoreColor = (score: number) => {
+  const _getScoreColor = (score: number) => {
     if (score >= 80) return "text-accent-black";
     if (score >= 60) return "text-accent-black";
     return "text-accent-black";

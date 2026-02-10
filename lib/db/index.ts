@@ -60,14 +60,12 @@ export interface FileSnapshot {
 
 // ─── Supabase client singleton ───────────────────────────────────────────────
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let supabaseClient: SupabaseClient<any> | null = null;
 
 /**
  * Get the Supabase client instance (singleton).
  * Returns null if Supabase is not configured.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getSupabase(): SupabaseClient<any> | null {
   if (supabaseClient) return supabaseClient;
 

@@ -14,8 +14,7 @@ import {
   FiFile, 
   FiChevronRight, 
   FiChevronDown,
-  FiGithub,
-  BsFolderFill, 
+  BsFolderFill,
   BsFolder2Open,
   SiJavascript, 
   SiReact, 
@@ -47,8 +46,8 @@ interface ChatMessage {
 function AISandboxPage() {
   const [sandboxData, setSandboxData] = useState<SandboxData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState({ text: 'Not connected', active: false });
-  const [responseArea, setResponseArea] = useState<string[]>([]);
+  const [_status, setStatus] = useState({ text: 'Not connected', active: false });
+  const [_responseArea, setResponseArea] = useState<string[]>([]);
   const [structureContent, setStructureContent] = useState('No sandbox created yet');
   const [promptInput, setPromptInput] = useState('');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -66,31 +65,31 @@ function AISandboxPage() {
     const modelParam = searchParams.get('model');
     return appConfig.ai.availableModels.includes(modelParam || '') ? modelParam! : appConfig.ai.defaultModel;
   });
-  const [urlOverlayVisible, setUrlOverlayVisible] = useState(false);
-  const [urlInput, setUrlInput] = useState('');
-  const [urlStatus, setUrlStatus] = useState<string[]>([]);
+  const [_urlOverlayVisible, setUrlOverlayVisible] = useState(false);
+  const [_urlInput, setUrlInput] = useState('');
+  const [_urlStatus, setUrlStatus] = useState<string[]>([]);
   const [showHomeScreen, setShowHomeScreen] = useState(true);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set(['app', 'src', 'src/components']));
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
-  const [homeScreenFading, setHomeScreenFading] = useState(false);
+  const [_homeScreenFading, setHomeScreenFading] = useState(false);
   const [homeUrlInput, setHomeUrlInput] = useState('');
   const [homeContextInput, setHomeContextInput] = useState('');
   const [activeTab, setActiveTab] = useState<'generation' | 'preview'>('preview');
-  const [showStyleSelector, setShowStyleSelector] = useState(false);
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [showLoadingBackground, setShowLoadingBackground] = useState(false);
+  const [_showStyleSelector, _setShowStyleSelector] = useState(false);
+  const [_selectedStyle, setSelectedStyle] = useState<string | null>(null);
+  const [_showLoadingBackground, setShowLoadingBackground] = useState(false);
   const [urlScreenshot, setUrlScreenshot] = useState<string | null>(null);
   const [isScreenshotLoaded, setIsScreenshotLoaded] = useState(false);
   const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
   const [screenshotError, setScreenshotError] = useState<string | null>(null);
   const [isPreparingDesign, setIsPreparingDesign] = useState(false);
-  const [targetUrl, setTargetUrl] = useState<string>('');
+  const [_targetUrl, setTargetUrl] = useState<string>('');
   const [sidebarScrolled, setSidebarScrolled] = useState(false);
   const [loadingStage, setLoadingStage] = useState<'gathering' | 'planning' | 'generating' | null>(null);
   const [isStartingNewGeneration, setIsStartingNewGeneration] = useState(false);
-  const [sandboxFiles, setSandboxFiles] = useState<Record<string, string>>({});
+  const [_sandboxFiles, setSandboxFiles] = useState<Record<string, string>>({});
   const [hasInitialSubmission, setHasInitialSubmission] = useState<boolean>(false);
-  const [fileStructure, setFileStructure] = useState<string>('');
+  const [_fileStructure, setFileStructure] = useState<string>('');
   
   const [conversationContext, setConversationContext] = useState<{
     scrapedWebsites: Array<{ url: string; content: any; timestamp: Date }>;
@@ -392,7 +391,7 @@ function AISandboxPage() {
     addChatMessage('Checking packages... Sandbox is ready with Vite configuration.', 'system');
   };
   
-  const handleSurfaceError = (_errors: any[]) => {
+  const _handleSurfaceError = (_errors: any[]) => {
     // Function kept for compatibility but Vite errors are now handled by template
     
     // Focus the input
@@ -402,7 +401,7 @@ function AISandboxPage() {
     }
   };
   
-  const installPackages = async (packages: string[]) => {
+  const _installPackages = async (packages: string[]) => {
     if (!sandboxData) {
       addChatMessage('No active sandbox. Create a sandbox first!', 'system');
       return;
@@ -2609,7 +2608,7 @@ Tip: I automatically detect and install npm packages from your code imports (lik
     }
   };
 
-  const handleHomeScreenSubmit = async (e: React.FormEvent) => {
+  const _handleHomeScreenSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await startGeneration();
   };

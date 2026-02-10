@@ -3,7 +3,6 @@ import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
 import { validateCommand, checkRateLimit, getClientId } from '@/lib/security';
 
 declare global {
-  // eslint-disable-next-line no-var
   var activeSandboxProvider: any;
 }
 

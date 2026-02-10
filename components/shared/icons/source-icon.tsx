@@ -1,4 +1,3 @@
-import { JSXElementConstructor } from "react";
 import Image from "next/image";
 
 export const SourceIcon = ({ id }: { id: string }) => {

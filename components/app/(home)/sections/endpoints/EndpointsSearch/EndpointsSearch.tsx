@@ -5,7 +5,7 @@ import { animate } from "motion";
 import { useEffect, useRef } from "react";
 
 export default function EndpointsSearch({
-  alwaysHeat,
+  alwaysHeat: _alwaysHeat,
   size = 20,
 }: {
   alwaysHeat?: boolean;

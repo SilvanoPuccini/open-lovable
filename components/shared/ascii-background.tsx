@@ -33,7 +33,7 @@ interface AsciiBackgroundProps {
 
 export function AsciiBackground({
   className,
-  variant = "dots",
+  variant: _variant = "dots",
 }: AsciiBackgroundProps) {
   const [frameIndex, setFrameIndex] = useState(0);
 

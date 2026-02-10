@@ -150,7 +150,7 @@ function findComponentFiles(prompt: string, manifest: FileManifest): string[] {
     for (const element of uiElements) {
       if (lowerPrompt.includes(element)) {
         // Look for exact component file matches first
-        for (const [path, fileInfo] of Object.entries(manifest.files)) {
+        for (const [path, _fileInfo] of Object.entries(manifest.files)) {
           const fileName = path.split('/').pop()?.toLowerCase() || '';
           // Only match if the filename contains the element name
           if (fileName.includes(element + '.') || fileName === element) {
@@ -161,7 +161,7 @@ function findComponentFiles(prompt: string, manifest: FileManifest): string[] {
         }
         
         // If no exact file match, look for the element in file names (but be more selective)
-        for (const [path, fileInfo] of Object.entries(manifest.files)) {
+        for (const [path, _fileInfo] of Object.entries(manifest.files)) {
           const fileName = path.split('/').pop()?.toLowerCase() || '';
           if (fileName.includes(element)) {
             files.push(path);
@@ -313,7 +313,7 @@ function findPackageFiles(manifest: FileManifest): string[] {
  */
 function findComponentByContent(prompt: string, manifest: FileManifest): string[] {
   const files: string[] = [];
-  const lowerPrompt = prompt.toLowerCase();
+  const _lowerPrompt = prompt.toLowerCase();
   
   console.log('[findComponentByContent] Searching for content in prompt:', prompt);
   
@@ -395,6 +395,7 @@ function getSuggestedContext(
 /**
  * Resolve import path to actual file path
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function resolveImportPath(
   fromFile: string,
   importPath: string,

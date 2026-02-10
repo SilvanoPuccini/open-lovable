@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sandboxManager } from '@/lib/sandbox/sandbox-manager';
+import { getDbStatus } from '@/lib/db';
 
 /**
  * Health check endpoint for monitoring and deployment verification.
@@ -38,6 +39,8 @@ export async function GET() {
     services.google.configured ||
     services.groq.configured;
 
+  const dbStatus = getDbStatus();
+
   const activeProvider = sandboxManager.getActiveProvider();
   const status = hasAiProvider && sandboxConfigured ? 'healthy' : 'degraded';
 
@@ -53,10 +56,12 @@ export async function GET() {
         configured: sandboxConfigured,
         active: !!activeProvider,
       },
+      database: dbStatus,
       services,
       checks: {
         aiProvider: hasAiProvider,
         sandboxProvider: sandboxConfigured,
+        database: dbStatus.configured,
         scraping: services.firecrawl.configured,
       },
     },

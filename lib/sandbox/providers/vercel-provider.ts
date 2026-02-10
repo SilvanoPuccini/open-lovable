@@ -12,8 +12,8 @@ export class VercelProvider extends SandboxProvider {
       if (this.sandbox) {
         try {
           await this.sandbox.stop();
-        } catch (e) {
-          console.error('Failed to stop existing sandbox:', e);
+        } catch (_e) {
+          console.error('Failed to stop existing sandbox:', _e);
         }
         this.sandbox = null;
       }
@@ -91,7 +91,7 @@ export class VercelProvider extends SandboxProvider {
         } else {
           stdout = result.stdout || '';
         }
-      } catch (e) {
+      } catch (_e) {
         stdout = '';
       }
       
@@ -101,7 +101,7 @@ export class VercelProvider extends SandboxProvider {
         } else {
           stderr = result.stderr || '';
         }
-      } catch (e) {
+      } catch (_e) {
         stderr = '';
       }
       
@@ -158,7 +158,7 @@ export class VercelProvider extends SandboxProvider {
       // Ensure directory exists
       const dir = fullPath.substring(0, fullPath.lastIndexOf('/'));
       if (dir) {
-        const mkdirResult = await this.sandbox.runCommand({
+        const _mkdirResult = await this.sandbox.runCommand({
           cmd: 'mkdir',
           args: ['-p', dir]
         });
@@ -205,7 +205,7 @@ export class VercelProvider extends SandboxProvider {
       } else {
         stdout = result.stdout || '';
       }
-    } catch (e) {
+    } catch (_e) {
       stdout = '';
     }
     
@@ -215,7 +215,7 @@ export class VercelProvider extends SandboxProvider {
       } else {
         stderr = result.stderr || '';
       }
-    } catch (e) {
+    } catch (_e) {
       stderr = '';
     }
     
@@ -248,7 +248,7 @@ export class VercelProvider extends SandboxProvider {
       } else {
         stdout = result.stdout || '';
       }
-    } catch (e) {
+    } catch (_e) {
       stdout = '';
     }
     
@@ -291,7 +291,7 @@ export class VercelProvider extends SandboxProvider {
       } else {
         stdout = result.stdout || '';
       }
-    } catch (e) {
+    } catch (_e) {
       stdout = '';
     }
     
@@ -301,7 +301,7 @@ export class VercelProvider extends SandboxProvider {
       } else {
         stderr = result.stderr || '';
       }
-    } catch (e) {
+    } catch (_e) {
       stderr = '';
     }
     
@@ -326,7 +326,7 @@ export class VercelProvider extends SandboxProvider {
     // Setting up Vite app for sandbox
     
     // Create directory structure
-    const mkdirResult = await this.sandbox.runCommand({
+    const _mkdirResult = await this.sandbox.runCommand({
       cmd: 'mkdir',
       args: ['-p', '/vercel/sandbox/src']
     });
@@ -620,8 +620,8 @@ body {
     if (this.sandbox) {
       try {
         await this.sandbox.stop();
-      } catch (e) {
-        console.error('Failed to terminate sandbox:', e);
+      } catch (_e) {
+        console.error('Failed to terminate sandbox:', _e);
       }
       this.sandbox = null;
       this.sandboxInfo = null;

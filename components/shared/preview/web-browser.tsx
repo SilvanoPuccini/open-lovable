@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import LivePreviewFrame from "./live-preview-frame";
 
 export default function WebBrowser({
-  url,
+  url: _url,
   sessionId,
   isScrapeComplete,
   children,

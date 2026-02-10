@@ -7,7 +7,7 @@ import { cn } from "@/utils/cn";
 
 const AlertDialog = ({
   children,
-  hideChatOnOpen = true,
+  hideChatOnOpen: _hideChatOnOpen = true,
   ...props
 }: React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Root> & {
   hideChatOnOpen?: boolean;

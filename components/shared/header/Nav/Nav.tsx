@@ -18,10 +18,8 @@ import Lead from "./_svg/Lead";
 import Platforms from "./_svg/Platforms";
 import Research from "./_svg/Research";
 import Student from "./_svg/Student";
-import Templates from "./_svg/Templates";
 import HeaderNavItem from "./Item/Item";
 import MCPIcon from "./_svg/MCP";
-import Image from "@/components/shared/image/Image";
 import GithubFlame from "@/components/shared/header/Dropdown/Github/Flame/Flame";
 import EndpointsMap from "@/components/app/(home)/sections/endpoints/EndpointsMap/EndpointsMap";
 

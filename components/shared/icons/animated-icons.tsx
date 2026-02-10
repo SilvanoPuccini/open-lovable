@@ -79,10 +79,6 @@ const withChartIconAnimation = (IconComponent: React.ComponentType<any>) => {
   }) => {
     const controls = useAnimation();
 
-    const handleHoverEnd = useCallback(() => {
-      controls.start("normal");
-    }, [controls]);
-
     const handleHoverStart = useCallback(async () => {
       await controls.start((i) => ({
         pathLength: 0,
@@ -94,6 +90,10 @@ const withChartIconAnimation = (IconComponent: React.ComponentType<any>) => {
         opacity: 1,
         transition: { delay: i * 0.1, duration: 0.3 },
       }));
+    }, [controls]);
+
+    const handleHoverEnd = useCallback(() => {
+      controls.start("normal");
     }, [controls]);
 
     useEffect(() => {

@@ -15,7 +15,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Open Lovable v2",
+  title: "Open Lovable v3",
   description: "Re-imagine any website in seconds with AI-powered website builder.",
 };
 
